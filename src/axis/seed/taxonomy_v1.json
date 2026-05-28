@@ -1,0 +1,78 @@
+{
+  "version": "1.0.0",
+  "label": "AXIS taxonomy v1 — initial release",
+  "categories": [
+    {
+      "key": "mobility",
+      "label": "Mobility",
+      "description": "Access for users of wheelchairs, walkers, canes, and crutches.",
+      "attributes": [
+        {"key": "step_free_entrance", "label": "Step-free entrance", "value_type": "bool"},
+        {"key": "entrance_threshold_height_cm", "label": "Entrance threshold height", "value_type": "numeric", "unit": "cm"},
+        {"key": "ramp_present", "label": "Ramp present at entrance", "value_type": "bool"},
+        {"key": "ramp_gradient_ratio", "label": "Ramp gradient (rise:run)", "value_type": "numeric", "unit": "ratio"},
+        {"key": "accessible_parking", "label": "Accessible parking on site", "value_type": "bool"},
+        {"key": "accessible_parking_distance_m", "label": "Distance from parking to entrance", "value_type": "numeric", "unit": "m"},
+        {"key": "elevator", "label": "Elevator serving all guest floors", "value_type": "bool"},
+        {"key": "elevator_door_width_cm", "label": "Elevator door clear width", "value_type": "numeric", "unit": "cm"},
+        {"key": "corridor_min_width_cm", "label": "Narrowest corridor width", "value_type": "numeric", "unit": "cm"},
+        {"key": "guest_room_door_width_cm", "label": "Guest-room door clear width", "value_type": "numeric", "unit": "cm"},
+        {"key": "roll_in_shower", "label": "Roll-in shower available", "value_type": "bool"},
+        {"key": "shower_seat", "label": "Shower seat available", "value_type": "bool"},
+        {"key": "grab_bars_in_bathroom", "label": "Grab bars in bathroom", "value_type": "bool"},
+        {"key": "raised_toilet", "label": "Raised toilet seat", "value_type": "bool"},
+        {"key": "toilet_seat_height_cm", "label": "Toilet seat height", "value_type": "numeric", "unit": "cm"},
+        {"key": "accessible_bed_height_cm", "label": "Bed height (top of mattress)", "value_type": "numeric", "unit": "cm"},
+        {"key": "patient_hoist_available", "label": "Patient hoist available on request", "value_type": "bool"}
+      ]
+    },
+    {
+      "key": "vision",
+      "label": "Vision",
+      "description": "Access for blind and low-vision users.",
+      "attributes": [
+        {"key": "braille_signage", "label": "Braille signage in common areas", "value_type": "bool"},
+        {"key": "braille_room_numbers", "label": "Braille room numbers", "value_type": "bool"},
+        {"key": "high_contrast_signage", "label": "High-contrast signage", "value_type": "bool"},
+        {"key": "tactile_paving", "label": "Tactile paving at entrance / hazards", "value_type": "bool"},
+        {"key": "large_print_menu", "label": "Large-print menu / information available", "value_type": "bool"},
+        {"key": "guide_dog_welcome", "label": "Guide / service dogs welcome", "value_type": "bool"},
+        {"key": "voice_announcements_elevator", "label": "Voice announcements in elevator", "value_type": "bool"}
+      ]
+    },
+    {
+      "key": "hearing",
+      "label": "Hearing",
+      "description": "Access for d/Deaf and hard-of-hearing users.",
+      "attributes": [
+        {"key": "hearing_loop", "label": "Hearing loop available", "value_type": "bool"},
+        {"key": "hearing_loop_at_reception", "label": "Hearing loop at reception desk", "value_type": "bool"},
+        {"key": "visual_fire_alarm", "label": "Visual (flashing) fire alarm in rooms", "value_type": "bool"},
+        {"key": "visual_doorbell", "label": "Visual doorbell / door alert", "value_type": "bool"},
+        {"key": "subtitled_tv", "label": "Subtitled TV available in rooms", "value_type": "bool"},
+        {"key": "sign_language_staff", "label": "Staff trained in sign language", "value_type": "bool"}
+      ]
+    },
+    {
+      "key": "cognitive",
+      "label": "Cognitive",
+      "description": "Access for users with cognitive / learning differences.",
+      "attributes": [
+        {"key": "easy_read_information_available", "label": "Easy-read information available", "value_type": "bool"},
+        {"key": "staff_disability_awareness_training", "label": "Staff disability-awareness training", "value_type": "bool"},
+        {"key": "quiet_check_in_available", "label": "Quiet / off-peak check-in available", "value_type": "bool"},
+        {"key": "sensory_room", "label": "Dedicated sensory / quiet room", "value_type": "bool"}
+      ]
+    },
+    {
+      "key": "sensory",
+      "label": "Sensory",
+      "description": "Access for sensory-sensitive users (lighting, sound, scent).",
+      "attributes": [
+        {"key": "adjustable_lighting_in_room", "label": "Adjustable lighting in guest room", "value_type": "bool"},
+        {"key": "low_stimulation_dining_area", "label": "Low-stimulation dining area available", "value_type": "bool"},
+        {"key": "fragrance_free_room_available", "label": "Fragrance-free room available", "value_type": "bool"}
+      ]
+    }
+  ]
+}
