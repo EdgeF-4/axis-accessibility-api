@@ -32,6 +32,26 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
+  worker:
+    build:
+      context: .
+      target: runtime
+    container_name: axis-worker
+    command: ["arq", "axis.ingestion.tasks.WorkerSettings"]
+    environment:
+      AXIS_ENV: ${AXIS_ENV:-development}
+      AXIS_LOG_LEVEL: ${AXIS_LOG_LEVEL:-INFO}
+      AXIS_DB_DSN: postgresql+asyncpg://${POSTGRES_USER:-axis}:${POSTGRES_PASSWORD:-axis}@db:5432/${POSTGRES_DB:-axis}
+      AXIS_REDIS_URL: redis://redis:6379/0
+      AXIS_JWT_SECRET: ${AXIS_JWT_SECRET:-dev-only-replace-with-a-real-secret-of-32-or-more-bytes}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
 
   db:
     # pgvector image bundles Postgres 16 + the pgvector extension required by
