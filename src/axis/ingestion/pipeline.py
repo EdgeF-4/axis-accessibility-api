@@ -24,6 +24,7 @@ from axis.db.models import (
     TaxonomyVersion,
 )
 from axis.db.models.enums import JobStatus
+from axis.embeddings.fake import FakeEmbedder
 from axis.extraction.fake import FakeExtractor
 from axis.extraction.provider import (
     ExtractorProvider,
@@ -32,11 +33,14 @@ from axis.extraction.provider import (
 )
 from axis.ids import new_id
 from axis.ingestion.circuit import CircuitBreaker, CircuitOpenError
+from axis.ingestion.embedding import embed_job_datapoints
 from axis.ingestion.persist import persist_extraction
 from axis.ingestion.retry import RetryableProviderError, with_retry
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
+
+    from axis.embeddings.provider import EmbeddingProvider
 
 
 async def _current_taxonomy(session: AsyncSession) -> TaxonomySnapshot:
@@ -90,14 +94,16 @@ async def run_ingestion_job(
     *,
     provider: ExtractorProvider | None = None,
     breaker: CircuitBreaker | None = None,
+    embedder: EmbeddingProvider | None = None,
 ) -> dict[str, int]:
     """Drive a single :class:`IngestionJob` from QUEUED to a terminal state.
 
     Returns the persistence summary on success (``persisted`` /
-    ``reviewed`` / ``dropped`` / ``conflicts`` / ``unknown``).
+    ``reviewed`` / ``dropped`` / ``conflicts`` / ``unknown`` / ``embedded``).
     """
     s = get_settings()
     provider = provider or FakeExtractor()
+    embedder = embedder or FakeEmbedder()
     breaker = breaker or get_default_breaker()
 
     # --- Stage 0: lift the job into RUNNING, capture inputs --------------------
@@ -165,6 +171,14 @@ async def run_ingestion_job(
             job_id=job_id,
             result=result,  # type: ignore[arg-type]
         )
+
+    # --- Stage 6: embed (separate session so a stage-6 failure does not
+    # roll back the persisted datapoints).
+    async with session_scope() as session:
+        embedded = await embed_job_datapoints(session, job_id=job_id, provider=embedder)
+    summary["embedded"] = embedded
+
+    async with session_scope() as session:
         finished = await session.get(IngestionJob, job_id)
         if finished is not None:
             finished.status = JobStatus.SUCCEEDED
