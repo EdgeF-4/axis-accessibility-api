@@ -1,0 +1,64 @@
+# =============================================================================
+# AXIS — local stack.
+#
+# Phase 0 ships db + redis only. The `api` and `worker` services are added in
+# Phase 3 (read API) and Phase 4 (ingestion worker) respectively, once there
+# is application code to run.
+#
+# Usage:
+#   docker compose up -d                  # full stack (once api/worker land)
+#   docker compose up -d db redis         # data plane only (Phase 0..2)
+#   docker compose logs -f db
+# =============================================================================
+name: axis
+
+services:
+  db:
+    # pgvector image bundles Postgres 16 + the pgvector extension required by
+    # the semantic-search path (ADR-0001). Avoids hand-rolling an init script.
+    image: pgvector/pgvector:pg16
+    container_name: axis-db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-axis}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-axis}
+      POSTGRES_DB: ${POSTGRES_DB:-axis}
+      # Required by pgvector for HNSW index builds on larger embedding sets.
+      POSTGRES_INITDB_ARGS: "--data-checksums"
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - axis_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-axis} -d ${POSTGRES_DB:-axis}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: axis-redis
+    command:
+      - redis-server
+      - --save
+      - "60"
+      - "1000"
+      - --appendonly
+      - "yes"
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - axis_redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+volumes:
+  axis_pgdata:
+    name: axis_pgdata
+  axis_redisdata:
+    name: axis_redisdata
