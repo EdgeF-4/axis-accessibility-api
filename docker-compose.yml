@@ -1,18 +1,38 @@
 # =============================================================================
 # AXIS — local stack.
 #
-# Phase 0 ships db + redis only. The `api` and `worker` services are added in
-# Phase 3 (read API) and Phase 4 (ingestion worker) respectively, once there
-# is application code to run.
+# Phase 3 brings the api service online; the worker lands in Phase 4.
 #
 # Usage:
-#   docker compose up -d                  # full stack (once api/worker land)
-#   docker compose up -d db redis         # data plane only (Phase 0..2)
-#   docker compose logs -f db
+#   docker compose up -d                  # full stack
+#   docker compose up -d db redis         # data plane only
+#   docker compose logs -f api
 # =============================================================================
 name: axis
 
 services:
+  api:
+    build:
+      context: .
+      target: runtime
+    container_name: axis-api
+    environment:
+      AXIS_ENV: ${AXIS_ENV:-development}
+      AXIS_LOG_LEVEL: ${AXIS_LOG_LEVEL:-INFO}
+      AXIS_DB_DSN: postgresql+asyncpg://${POSTGRES_USER:-axis}:${POSTGRES_PASSWORD:-axis}@db:5432/${POSTGRES_DB:-axis}
+      AXIS_REDIS_URL: redis://redis:6379/0
+      AXIS_JWT_SECRET: ${AXIS_JWT_SECRET:-dev-only-replace-with-a-real-secret-of-32-or-more-bytes}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+    ports:
+      - "${AXIS_PORT:-8000}:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+
   db:
     # pgvector image bundles Postgres 16 + the pgvector extension required by
     # the semantic-search path (ADR-0001). Avoids hand-rolling an init script.
