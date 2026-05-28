@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+from collections.abc import (
+    AsyncIterator,  # noqa: TC003 -- pytest_asyncio needs runtime visibility on fixture return types
+)
 from typing import TYPE_CHECKING
 
 import pytest
@@ -13,12 +16,16 @@ if TYPE_CHECKING:
 
 
 @pytest_asyncio.fixture
-async def app(applied_db_url: str) -> FastAPI:
+async def app(applied_db_url: str) -> AsyncIterator[FastAPI]:
     from axis.db.base import dispose_engine
     from axis.main import create_app
 
     await dispose_engine()
-    return create_app()
+    app = create_app()
+    yield app
+    from axis.db.base import dispose_engine as _dispose
+
+    await _dispose()
 
 
 @pytest_asyncio.fixture
