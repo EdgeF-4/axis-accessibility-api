@@ -124,6 +124,7 @@ erDiagram
     USER ||--o{ REVIEW_ITEM      : "resolves"
 
     TAXONOMY_VERSION  ||--o{ TAXONOMY_CATEGORY   : "scopes"
+    TAXONOMY_VERSION  ||--o{ TAXONOMY_ATTRIBUTE  : "scopes"
     TAXONOMY_CATEGORY ||--o{ TAXONOMY_ATTRIBUTE  : "groups"
     TAXONOMY_ATTRIBUTE ||--o{ ATTRIBUTE_ENUM_VALUE : "allows"
 
@@ -133,7 +134,7 @@ erDiagram
     INGESTION_JOB         ||--o{ DATAPOINT         : "produced"
     INGESTION_JOB         ||--o{ REVIEW_ITEM       : "queued"
     INGESTION_JOB         ||--o| DLQ_ENTRY         : "failed into"
-    DATAPOINT             ||--o| DATAPOINT         : "supersedes"
+    DATAPOINT             ||--o| DATAPOINT         : "superseded by"
 
     USER {
       uuid   id PK
@@ -186,8 +187,8 @@ erDiagram
       text    provenance    "human|partner_feed|ai_extraction"
       uuid    verified_by FK "nullable"
       uuid    job_id FK     "nullable"
-      uuid    supersedes_id FK "nullable, self-ref"
-      vector  embedding     "pgvector(768)"
+      uuid    superseded_by_id FK "nullable, self-ref"
+      vector  embedding     "pgvector(384)"
       timestamptz created_at
     }
     INGESTION_JOB {
@@ -228,12 +229,15 @@ erDiagram
 - `taxonomy_attribute.value_type` is an `ENUM`; the column `unit` is `NULL`
   unless `value_type = 'numeric'` (CHECK).
 - `datapoint(venue_id, attribute_id, provenance)` carries a partial unique
-  index `WHERE supersedes_id IS NULL` — at most one *live* fact per
-  `(venue, attribute, provenance)`; older versions remain as the historical
-  chain via `supersedes_id`.
+  index `WHERE superseded_by_id IS NULL` — at most one *live* fact per
+  `(venue, attribute, provenance)`; older or dominated rows form the
+  historical chain via the self-FK `superseded_by_id`. The chain points
+  forward in time (an older row's `superseded_by_id` references the newer
+  row that replaced it).
 - `venue.search_vector` is a generated column over `name || venue_type ||
   source_metadata->>'description'`, GIN-indexed.
-- `datapoint.embedding` uses an HNSW index for cosine similarity.
+- `datapoint.embedding` is `vector(384)` (all-MiniLM-L6-v2; locked by
+  ADR-0004 in Phase 6) and uses an HNSW index for cosine similarity.
 - `ingestion_job.idempotency_key` is `UNIQUE`. Re-POSTing the same key
   returns the existing job ID (HTTP 200, not 201) — never enqueues twice.
 
