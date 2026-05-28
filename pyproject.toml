@@ -212,21 +212,24 @@ markers = [
 
 [tool.coverage.run]
 branch = true
-source = ["src/axis"]
+# ``source_pkgs`` (the package name) lets coverage.py track lines whether
+# the module is executed via the src/ checkout or the installed editable
+# wheel — the path-based ``source`` form silently misses one of them.
+source_pkgs = ["axis"]
+# httpx ASGITransport drives async route handlers in a thread pool;
+# without ``thread`` concurrency, coverage.py undercounts every line in
+# the body of an async endpoint. Greenlet covers SQLAlchemy 2.0 async.
+concurrency = ["thread", "greenlet"]
 omit = [
-  "src/axis/db/migrations/*",
-  "src/axis/__main__.py",
+  "*/axis/db/migrations/*",
+  "*/axis/__main__.py",
 ]
 
 [tool.coverage.report]
 precision = 1
 show_missing = true
 skip_covered = false
-# Phase 8 brings the gate back to 85 once CI runs the full real-Redis path
-# (ARQ tasks module, anthropic-provider integration with key) and the
-# production-only readiness checks. For now the gate is intentionally 80 —
-# anything below means a meaningful regression, not just untested glue.
-fail_under = 80
+fail_under = 85
 exclude_lines = [
   "pragma: no cover",
   "raise NotImplementedError",
