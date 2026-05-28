@@ -36,6 +36,8 @@ dependencies = [
   "asyncpg>=0.29,<0.31",
   "alembic>=1.13,<1.15",
   "pgvector>=0.3.5,<0.4",
+  # --- identifiers ---
+  "uuid-utils>=0.9,<1.0",   # UUID v7 (ADR-0002)
   # --- validation ---
   "pydantic>=2.7,<3.0",
   "pydantic-settings>=2.3,<3.0",
@@ -129,6 +131,12 @@ ignore = [
 "src/axis/db/migrations/**" = [
   "N999",       # alembic revision filenames
 ]
+"src/axis/db/models/**" = [
+  # SQLAlchemy 2.0 resolves Mapped[T] annotations at runtime (even under
+  # ``from __future__ import annotations``), so types used in mappers must
+  # be at module scope, not in a TYPE_CHECKING block.
+  "TC001", "TC002", "TC003",
+]
 
 [tool.ruff.lint.isort]
 known-first-party = ["axis"]
@@ -161,13 +169,17 @@ module = [
   "slowapi.*",
   "arq.*",
   "pgvector.*",
+  "testcontainers.*",
 ]
 ignore_missing_imports = true
 
 [tool.pydantic-mypy]
 init_forbid_extra = true
 init_typed = true
-warn_required_dynamic_aliases = true
+# The dynamic-alias warning fires on AliasChoices (used to honour
+# ANTHROPIC_API_KEY without the AXIS_ prefix); pydantic-settings handles
+# the runtime correctly, so the warning is noise.
+warn_required_dynamic_aliases = false
 
 # -----------------------------------------------------------------------------
 # pytest
