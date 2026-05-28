@@ -89,6 +89,7 @@ async def test_pipeline_persists_high_confidence_datapoint(seeded: None) -> None
         "dropped": 0,
         "conflicts": 0,
         "unknown": 0,
+        "embedded": 1,
     }
     async with get_session_factory()() as session:
         job = await session.get(IngestionJob, job_id)
@@ -149,6 +150,7 @@ async def test_pipeline_drops_below_review_threshold(seeded: None) -> None:
         "dropped": 1,
         "conflicts": 0,
         "unknown": 0,
+        "embedded": 0,
     }
 
 
