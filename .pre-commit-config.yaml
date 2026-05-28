@@ -1,0 +1,57 @@
+# Pre-commit hooks — fast checks at commit time. CI re-runs the full matrix.
+# Install once: pre-commit install
+#
+# Mypy is intentionally NOT in pre-commit: it is slow, env-sensitive, and the
+# CI job runs it against the resolved project venv. Pre-commit catches the
+# 95% (lint + format + hygiene); CI catches the rest.
+default_language_version:
+  python: python3.12
+
+repos:
+  # ---------------------------------------------------------------------------
+  # Ruff — lint + format. Replaces flake8 / isort / black.
+  # ---------------------------------------------------------------------------
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.6.9
+    hooks:
+      - id: ruff
+        args: [--fix, --exit-non-zero-on-fix]
+      - id: ruff-format
+
+  # ---------------------------------------------------------------------------
+  # General hygiene
+  # ---------------------------------------------------------------------------
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+        exclude: '\.md$'   # md trailing-space is meaningful (line break)
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-toml
+      - id: check-json
+      - id: check-added-large-files
+        args: [--maxkb=512]
+      - id: check-merge-conflict
+      - id: check-case-conflict
+      - id: detect-private-key
+      - id: mixed-line-ending
+        args: [--fix=lf]
+
+  # ---------------------------------------------------------------------------
+  # Secrets — fail commit if obvious secrets slip in.
+  # ---------------------------------------------------------------------------
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.21.2
+    hooks:
+      - id: gitleaks
+
+  # ---------------------------------------------------------------------------
+  # Conventional Commits — enforce commit message shape locally.
+  # ---------------------------------------------------------------------------
+  - repo: https://github.com/compilerla/conventional-pre-commit
+    rev: v3.4.0
+    hooks:
+      - id: conventional-pre-commit
+        stages: [commit-msg]
+        args: [--strict, --force-scope, feat, fix, docs, style, refactor, test, build, ci, chore, perf, revert]
