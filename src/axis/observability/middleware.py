@@ -42,7 +42,7 @@ class ObservabilityMiddleware(BaseHTTPMiddleware):
         response: Response | None = None
         try:
             response = await call_next(request)
-            return response
+            return response  # noqa: RET504 -- response is read again in the finally block
         finally:
             elapsed = time.perf_counter() - started
             # ``request.scope['route'].path`` is the route template (e.g.

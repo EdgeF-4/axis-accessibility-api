@@ -194,4 +194,4 @@ def test_function_is_total_over_all_provenance_pairs() -> None:
         )
         for inc in Provenance:
             action = reconcile(existing, _incoming(inc, True))
-            assert isinstance(action, (InsertLive, SupersedeLive, StoreSuperseded, NoOp))
+            assert isinstance(action, InsertLive | SupersedeLive | StoreSuperseded | NoOp)

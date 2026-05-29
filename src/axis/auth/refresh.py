@@ -26,10 +26,10 @@ import hashlib
 import secrets
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, cast
 from uuid import UUID, uuid4
 
-from sqlalchemy import select, update
+from sqlalchemy import CursorResult, select, update
 
 from axis.config import Settings, get_settings
 from axis.db.models import RefreshToken
@@ -145,4 +145,6 @@ async def revoke_family(session: AsyncSession, family_id: UUID) -> int:
     )
     result = await session.execute(stmt)
     await session.flush()
-    return int(result.rowcount or 0)
+    # session.execute() is typed Result[Any]; a DML statement yields a
+    # CursorResult at runtime, which is where rowcount lives.
+    return int(cast(CursorResult[Any], result).rowcount or 0)

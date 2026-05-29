@@ -40,9 +40,32 @@ def _docker_available() -> bool:
     return os.environ.get("AXIS_TEST_DISABLE_DOCKER") != "1"
 
 
+def _preprovisioned_dsn() -> str | None:
+    """Return a pre-provisioned Postgres DSN if one is wired up.
+
+    With ``AXIS_TEST_DISABLE_DOCKER=1`` we do not start testcontainers; the
+    integration suite instead runs against the Postgres reachable at
+    ``AXIS_DB_DSN`` (e.g. the pgvector service container the CI workflow
+    provisions). Returns ``None`` when no such database is configured.
+    """
+    if os.environ.get("AXIS_TEST_DISABLE_DOCKER") == "1":
+        return os.environ.get("AXIS_DB_DSN") or None
+    return None
+
+
 @pytest.fixture(scope="session")
 def postgres_url() -> Iterator[str]:
-    """Spin up a pgvector-enabled Postgres container for the session."""
+    """Yield a pgvector-enabled Postgres DSN for the session.
+
+    Prefers a pre-provisioned database (CI service container via
+    ``AXIS_DB_DSN``); otherwise starts a throwaway testcontainer when Docker
+    is available, and skips the integration suite when neither is present.
+    """
+    preprovisioned = _preprovisioned_dsn()
+    if preprovisioned is not None:
+        yield preprovisioned
+        return
+
     if not _docker_available():
         pytest.skip("Docker not available; integration tests require pgvector container")
 
