@@ -1,12 +1,8 @@
 # EdgeF-4
 
-> **Solo, backend architect.** I build production data + AI
-> systems: schema-first, typed end-to-end, observable, tested against the
-> real database.
-
-Looking for engineers who treat the LLM as one component in a larger
-deterministic system — not as a way to skip the schema, the auth model,
-or the migration story? That's the work here.
+> **Backend engineer building production data and AI systems.** I build
+> production data + AI systems: schema-first, typed end-to-end, observable,
+> tested against the real database.
 
 ---
 
@@ -22,7 +18,8 @@ similarity.
 - **Python 3.12 · FastAPI · SQLAlchemy 2.0 async · Postgres 16 + pgvector ·
   Redis · ARQ · Anthropic Claude · sentence-transformers · structlog ·
   OpenTelemetry · Prometheus · slowapi · ruff · mypy --strict**
-- Built in deliberate phases, each documented with an architecture decision record.
+- Built in deliberate phases, each documented with an architecture
+  decision record.
 - 169 tests on real Postgres + Redis via testcontainers + httpx ASGI
   transport. ≥85 % coverage, `mypy --strict` clean, zero un-justified `Any`.
 - Architecture and ADRs all in repo —

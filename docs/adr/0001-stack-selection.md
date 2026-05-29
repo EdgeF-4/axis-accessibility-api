@@ -8,12 +8,16 @@
 
 ## Context
 
-AXIS is an Accessibility Intelligence API over a non-trivial domain: structured accessibility data, LLM-based extraction, and semantic search. I lock the stack early to avoid late-phase rewrites driven by tool envy and to keep the data plane in one engine.
+AXIS is an Accessibility Intelligence API over a non-trivial domain:
+structured accessibility data, LLM-based extraction, and semantic search.
+I lock the stack early to avoid late-phase rewrites driven by tool envy and
+to keep the data plane — constraints, FTS, vectors, migrations — in one
+engine.
 
 Three forces shape the choice:
 
-1. **LLM as a first-class component.** Extraction via the LLM is core,
-   not bolted on. The stack must support clean adapter interfaces, mocked
+1. **LLM as a first-class component.** Extraction via the LLM is core, not
+   bolted on. The stack must support clean adapter interfaces, mocked
    testing, and observability around the LLM call.
 2. **Production-realistic data plane.** Constraints, FTS, vectors, and
    migrations must all live in the same database to avoid the "demo with
@@ -55,7 +59,9 @@ that supersedes this one.
 - **Django + DRF** — would force sync ORM patterns and a heavier template
   layer the project does not need. The async story is still bolt-on.
   *Rejected.*
-- **NestJS / TypeScript** — strong typing and good DX, but the Python data / pgvector / async-worker ecosystem is the better fit for a data + AI extraction pipeline, and its async-ORM support is more mature.
+- **NestJS / TypeScript** — strong typing and good DX, but the Python data /
+  pgvector / async-worker ecosystem is the better fit for a data + AI
+  extraction pipeline, and its async-ORM support is more mature.
   *Rejected.*
 - **Celery (over ARQ)** — battle-tested, but its sync core and broker
   surface are heavier than needed. ARQ matches the rest of the async stack
